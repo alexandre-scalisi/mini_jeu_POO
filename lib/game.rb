@@ -85,26 +85,29 @@ end
 
 class Game
 
-  attr_accessor :human_player, :enemies, :players_left, :enemies_in_sight
+  attr_accessor :human_player, :enemies_in_sight, :players_left
   def initialize(human_player)
     @human_player = HumanPlayer.new(human_player.to_s)
-    @enemies = []
-    (1..4).each {|p| @enemies<< Player.new("player#{p}")}
+    @enemies_in_sight = []
+    @players_left = 10
+    
     
   end
 
   def kill_player(player)
-    @enemies.delete(player)
+    @enemies_in_sight.delete(player)
+    @players_left -=1
+    puts "#{player} a été tué"
     
   end
 
   def is_still_going?
-    @human_player.life_points > 0 && @enemies.length > 0
+    @human_player.life_points > 0 && @players_left > 0
   end
 
   def show_players
     @human_player.show_state
-    puts "Il reste #{@enemies.length} ennemis"
+    puts "Il reste #{@players_left} ennemis dont #{@enemies_in_sight.length} en vue"
   end
 
   def menu()
@@ -113,12 +116,15 @@ class Game
       puts "a - chercher une meilleure arme"
       puts "s - chercher à se soigner"
   
-      puts "attaquer un joueur en vue :\n\n"
-      
-      @enemies.each_with_index do |enemie,i|
-      print "#{i} - "
-      enemie.show_state
+      unless @enemies_in_sight.length==0
+        puts "\nattaquer un joueur en vue :\n\n"
+        
+        @enemies_in_sight.each_with_index do |enemie,i|
+          print "#{i} - "
+          enemie.show_state
+        end
       end
+
       print "> "
       input = gets.chomp
       stop = menu_choice(input)
@@ -138,8 +144,8 @@ class Game
           @human_player.search_health_pack
           return true
     
-        elsif (choice.to_i) >=0 && (choice.to_i) < @enemies.length
-          attacked_enemie = @enemies[choice.to_i]
+        elsif (choice.to_i) >=0 && (choice.to_i) < @enemies_in_sight.length
+          attacked_enemie = @enemies_in_sight[choice.to_i]
           @human_player.attacks(attacked_enemie)
           kill_player(attacked_enemie) if attacked_enemie.life_points <= 0 
           return true
@@ -149,12 +155,32 @@ class Game
   end
 
   def enemies_attack
-    @enemies.each do |p|
+    @enemies_in_sight.each do |p|
       break if @human_player.life_points <= 0
       p.attacks(@human_player)
       
       puts
     end
+  end
+
+  def new_players_in_sight
+    if @players_left == @enemies_in_sight.length
+      puts "Tous les joueurs sont déjà en vue"
+      return
+    end
+    de = rand(1..6)
+
+    if de == 1
+      puts "Pas de nouveau joueur adverse"
+    elsif (de >= 2 && de <=4) || (@enemies_in_sight.length+2 > @players_left)
+      puts "Un nouveau joueur arrive"
+      @enemies_in_sight << Player.new("Player#{rand(0..9999999999999)}")
+    else
+      puts "Deux nouveaux joueurs arrivent"
+      @enemies_in_sight.push(Player.new("Player#{rand(0..9999999999999)}"),Player.new("Player#{rand(0..9999999999999)}"))
+
+    end
+
   end
 
   def end

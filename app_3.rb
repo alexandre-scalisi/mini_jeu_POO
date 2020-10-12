@@ -15,12 +15,17 @@ puts (
 puts "\nQuel est ton nom?"
 print '> '
 nom = gets.chomp
+puts
 game = Game.new(nom)
 while game.is_still_going?
-  puts game.human_player.show_state
+  game.show_players
+  puts
+  game.new_players_in_sight
   game.menu
+
   break if !game.is_still_going?
-  puts "\nLes autres joueurs t'attaquent !"
+  next if game.enemies_in_sight.length.zero? 
+  puts "\nLes autres joueurs t'attaquent !\n\n"
 
   game.enemies_attack
 
