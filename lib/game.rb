@@ -52,7 +52,7 @@ class HumanPlayer < Player
       @weapon_level = nv_arme_trouvee
       puts 'Youhou ! elle est meilleure que ton arme actuelle : tu la prends.'
     else
-      puts "M@*#$... elle n'est pas mieux que ton arme actuelle..."
+      puts "M@*edks.. elle n'est pas mieux que ton arme actuelle..."
     end
   end
 
@@ -80,25 +80,20 @@ class HumanPlayer < Player
       puts 'Waow, tu as trouvé un pack de +80 points de vie !'
     end
   end
-
 end
 
 class Game
-
   attr_accessor :human_player, :enemies_in_sight, :players_left
   def initialize(human_player)
     @human_player = HumanPlayer.new(human_player.to_s)
     @enemies_in_sight = []
     @players_left = 10
-    
-    
   end
 
   def kill_player(player)
     @enemies_in_sight.delete(player)
-    @players_left -=1
+    @players_left -= 1
     puts "#{player} a été tué"
-    
   end
 
   def is_still_going?
@@ -110,83 +105,76 @@ class Game
     puts "Il reste #{@players_left} ennemis dont #{@enemies_in_sight.length} en vue"
   end
 
-  def menu()
+  def menu
     loop do
-      
-      puts "a - chercher une meilleure arme"
-      puts "s - chercher à se soigner"
-  
-      unless @enemies_in_sight.length==0
+      puts 'a - chercher une meilleure arme'
+      puts 's - chercher à se soigner'
+
+      unless @enemies_in_sight.empty?
         puts "\nattaquer un joueur en vue :\n\n"
-        
-        @enemies_in_sight.each_with_index do |enemie,i|
+
+        @enemies_in_sight.each_with_index do |enemie, i|
           print "#{i} - "
           enemie.show_state
         end
       end
 
-      print "> "
-      input = gets.chomp
-      stop = menu_choice(input)
+      stop = menu_choice
       puts "\n----------------------------------------"
       break if stop
     end
   end
 
-  def menu_choice(choice)
-      
-        
-        if choice == "a"
-          @human_player.search_weapon
-          return true
-    
-        elsif choice == "s" 
-          @human_player.search_health_pack
-          return true
-    
-        elsif (choice.to_i) >=0 && (choice.to_i) < @enemies_in_sight.length
-          attacked_enemie = @enemies_in_sight[choice.to_i]
-          @human_player.attacks(attacked_enemie)
-          kill_player(attacked_enemie) if attacked_enemie.life_points <= 0 
-          return true
-        end
-        
-    
+  def menu_choice
+    print '> '
+    choice = gets.chomp
+
+    if choice == 'a'
+      @human_player.search_weapon
+      true
+
+    elsif choice == 's'
+      @human_player.search_health_pack
+      true
+
+    elsif choice.ord == 48 || (choice.to_i > 0 && choice.to_i < @enemies_in_sight.length)
+      attacked_enemie = @enemies_in_sight[choice.to_i]
+      @human_player.attacks(attacked_enemie)
+      kill_player(attacked_enemie) if attacked_enemie.life_points <= 0
+      true
+    end
   end
 
   def enemies_attack
     @enemies_in_sight.each do |p|
       break if @human_player.life_points <= 0
       p.attacks(@human_player)
-      
+
       puts
     end
   end
 
   def new_players_in_sight
     if @players_left == @enemies_in_sight.length
-      puts "Tous les joueurs sont déjà en vue"
+      puts 'Tous les joueurs sont déjà en vue'
       return
     end
     de = rand(1..6)
 
     if de == 1
-      puts "Pas de nouveau joueur adverse"
-    elsif (de >= 2 && de <=4) || (@enemies_in_sight.length+2 > @players_left)
-      puts "Un nouveau joueur arrive"
-      @enemies_in_sight << Player.new("Player#{rand(0..9999999999999)}")
+      puts 'Pas de nouveau joueur adverse'
+    elsif (de >= 2 && de <= 4) || (@enemies_in_sight.length + 2 > @players_left)
+      puts 'Un nouveau joueur arrive'
+      @enemies_in_sight << Player.new("Player#{rand(0..9_999_999_999_999)}")
     else
-      puts "Deux nouveaux joueurs arrivent"
-      @enemies_in_sight.push(Player.new("Player#{rand(0..9999999999999)}"),Player.new("Player#{rand(0..9999999999999)}"))
+      puts 'Deux nouveaux joueurs arrivent'
+      @enemies_in_sight.push(Player.new("Player#{rand(0..9_999_999_999_999)}"), Player.new("Player#{rand(0..9_999_999_999_999)}"))
 
     end
-
   end
 
   def end
-    puts "Fini"
-    @human_player.life_points > 0 ? (puts "Vous avez gagné") : (puts "Vous avez perdu")
+    puts 'Fini'
+    @human_player.life_points > 0 ? (puts 'Vous avez gagné') : (puts 'Vous avez perdu')
   end
-    
-  
 end
